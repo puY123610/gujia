@@ -1,0 +1,11 @@
+{
+  "name": "@pet-platform/api-contract",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "generate": "openapi-typescript openapi.yaml -o generated-types/api-types.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.0.0"
+  }
+}

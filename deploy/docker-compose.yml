@@ -1,0 +1,71 @@
+services:
+  postgresql:
+    image: postgis/postgis:16-3.4
+    container_name: pet-postgresql
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pet_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pet_password}
+      POSTGRES_DB: ${POSTGRES_DB:-pet_platform}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pet_postgresql_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: pet-redis
+    ports:
+      - "6379:6379"
+
+  minio:
+    image: minio/minio:latest
+    container_name: pet-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - pet_minio_data:/data
+
+  backend:
+    build:
+      context: ../backend/pet-nestjs
+      dockerfile: Dockerfile
+    container_name: pet-backend
+    depends_on:
+      - postgresql
+      - redis
+      - minio
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-pet_user}:${POSTGRES_PASSWORD:-pet_password}@postgresql:5432/${POSTGRES_DB:-pet_platform}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-dev_only_replace_before_production}
+      STORAGE_DRIVER: minio
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-pet-platform}
+    ports:
+      - "3000:3000"
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: pet-nginx
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/pet-platform.conf:/etc/nginx/conf.d/pet-platform.conf:ro
+
+volumes:
+  pet_postgresql_data:
+  pet_minio_data:

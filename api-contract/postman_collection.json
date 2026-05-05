@@ -1,0 +1,188 @@
+{
+  "info": {
+    "name": "Pet Platform API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "userToken",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Home",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/home"
+          }
+        },
+        {
+          "name": "Emergency Articles",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/emergency/articles"
+          }
+        },
+        {
+          "name": "Hospitals",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/hospitals"
+          }
+        },
+        {
+          "name": "Lost Pets",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/lost-pets?page=1&pageSize=10"
+          }
+        }
+      ]
+    },
+    {
+      "name": "UserAuth",
+      "item": [
+        {
+          "name": "User Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"13800000000\",\n  \"password\": \"password\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/me"
+          }
+        },
+        {
+          "name": "Create Pet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"豆豆\",\n  \"species\": \"dog\"\n}"
+            },
+            "url": "{{baseUrl}}/pets"
+          }
+        },
+        {
+          "name": "Publish Lost Pet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"petName\": \"豆豆\",\n  \"lostTime\": \"2026-05-05T10:00:00.000Z\",\n  \"contactPhone\": \"13800000000\"\n}"
+            },
+            "url": "{{baseUrl}}/lost-pets"
+          }
+        }
+      ]
+    },
+    {
+      "name": "AdminAuth",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/auth/login"
+          }
+        },
+        {
+          "name": "Admin Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/users"
+          }
+        },
+        {
+          "name": "Audit Lost Pet",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/lost-pets/:id/audit"
+          }
+        }
+      ]
+    }
+  ]
+}

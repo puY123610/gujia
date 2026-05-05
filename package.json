@@ -1,0 +1,24 @@
+{
+  "name": "pet-platform",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.33.2",
+  "scripts": {
+    "check:env": "bash scripts/check-env.sh",
+    "init": "bash scripts/init-project.sh",
+    "generate:types": "bash scripts/generate-types.sh",
+    "services:start": "bash deploy/scripts/start.sh",
+    "services:stop": "bash deploy/scripts/stop.sh",
+    "services:restart": "bash deploy/scripts/restart.sh",
+    "dev:backend": "pnpm --dir backend/pet-nestjs start:dev",
+    "dev:frontend:h5": "pnpm --dir frontend/pet-uniapp dev:h5",
+    "dev:frontend:mp-weixin": "pnpm --dir frontend/pet-uniapp dev:mp-weixin",
+    "dev:admin": "pnpm --dir admin/pet-admin dev",
+    "build:backend": "pnpm --dir backend/pet-nestjs build",
+    "build:frontend:h5": "pnpm --dir frontend/pet-uniapp build:h5",
+    "build:frontend:mp-weixin": "pnpm --dir frontend/pet-uniapp build:mp-weixin",
+    "build:admin": "pnpm --dir admin/pet-admin build",
+    "typecheck": "pnpm --dir backend/pet-nestjs typecheck && pnpm --dir frontend/pet-uniapp typecheck && pnpm --dir admin/pet-admin typecheck",
+    "test": "pnpm --dir backend/pet-nestjs test"
+  }
+}

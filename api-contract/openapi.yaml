@@ -1,0 +1,1309 @@
+openapi: 3.0.3
+info:
+  title: Pet Platform API
+  version: 0.1.0
+  description: 宠物急救与寻宠协同平台 API 契约骨架。
+servers:
+  - url: http://localhost:3000/api
+    description: Local development
+  - url: https://api.example.com/api
+    description: Production placeholder
+tags:
+  - name: Public
+    description: 游客可访问接口。
+  - name: UserAuth
+    description: 普通用户登录后访问接口。
+  - name: AdminAuth
+    description: 管理员登录后访问接口。
+paths:
+  /home:
+    get:
+      tags: [Public]
+      summary: 首页聚合数据
+      x-permission: Public
+      responses:
+        "200":
+          description: 首页数据。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HomeResponse"
+
+  /emergency/categories:
+    get:
+      tags: [Public]
+      summary: 急救分类列表
+      x-permission: Public
+      responses:
+        "200":
+          description: 急救分类列表。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmergencyCategoryListResponse"
+
+  /emergency/articles:
+    get:
+      tags: [Public]
+      summary: 急救文章列表
+      x-permission: Public
+      parameters:
+        - name: categoryId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 急救文章列表。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmergencyArticleListResponse"
+
+  /emergency/articles/{id}:
+    get:
+      tags: [Public]
+      summary: 急救文章详情
+      x-permission: Public
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: 急救文章详情。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmergencyArticleDetailResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /hospitals:
+    get:
+      tags: [Public]
+      summary: 宠物医院列表
+      x-permission: Public
+      parameters:
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: longitude
+          in: query
+          required: false
+          schema:
+            type: number
+            format: double
+        - name: latitude
+          in: query
+          required: false
+          schema:
+            type: number
+            format: double
+        - name: radius
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 100
+            maximum: 50000
+      responses:
+        "200":
+          description: 宠物医院列表。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HospitalListResponse"
+
+  /hospitals/{id}:
+    get:
+      tags: [Public]
+      summary: 宠物医院详情
+      x-permission: Public
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: 宠物医院详情。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HospitalDetailResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /lost-pets:
+    get:
+      tags: [Public]
+      summary: 寻宠列表
+      x-permission: Public
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: 寻宠列表。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LostPetPageResponse"
+    post:
+      tags: [UserAuth]
+      summary: 发布寻宠
+      x-permission: UserAuth
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLostPetRequest"
+      responses:
+        "200":
+          description: 发布成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LostPetDetailResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /lost-pets/{id}:
+    get:
+      tags: [Public]
+      summary: 寻宠详情
+      x-permission: Public
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: 寻宠详情。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LostPetDetailResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /adoptions:
+    get:
+      tags: [Public]
+      summary: 领养列表
+      x-permission: Public
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: 领养列表。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdoptionPageResponse"
+    post:
+      tags: [UserAuth]
+      summary: 发布领养
+      x-permission: UserAuth
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdoptionRequest"
+      responses:
+        "200":
+          description: 发布成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdoptionDetailResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /adoptions/{id}:
+    get:
+      tags: [Public]
+      summary: 领养详情
+      x-permission: Public
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: 领养详情。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdoptionDetailResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /community/posts:
+    get:
+      tags: [Public]
+      summary: 社区帖子列表
+      x-permission: Public
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: 社区帖子列表。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityPostPageResponse"
+    post:
+      tags: [UserAuth]
+      summary: 发布帖子
+      x-permission: UserAuth
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePostRequest"
+      responses:
+        "200":
+          description: 发布成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityPostDetailResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /community/posts/{id}:
+    get:
+      tags: [Public]
+      summary: 社区帖子详情
+      x-permission: Public
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: 社区帖子详情。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityPostDetailResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /community/posts/{id}/comments:
+    post:
+      tags: [UserAuth]
+      summary: 发表评论
+      x-permission: UserAuth
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentRequest"
+      responses:
+        "200":
+          description: 评论成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/login:
+    post:
+      tags: [UserAuth]
+      summary: 用户登录
+      x-permission: Public
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: 登录成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+
+  /auth/me:
+    get:
+      tags: [UserAuth]
+      summary: 获取当前用户
+      x-permission: UserAuth
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: 当前用户信息。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /pets:
+    get:
+      tags: [UserAuth]
+      summary: 我的宠物列表
+      x-permission: UserAuth
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: 我的宠物列表。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PetProfileListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [UserAuth]
+      summary: 创建宠物档案
+      x-permission: UserAuth
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePetRequest"
+      responses:
+        "200":
+          description: 创建成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PetProfileResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /pets/{id}:
+    patch:
+      tags: [UserAuth]
+      summary: 更新宠物档案
+      x-permission: UserAuth
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePetRequest"
+      responses:
+        "200":
+          description: 更新成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PetProfileResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /favorites:
+    post:
+      tags: [UserAuth]
+      summary: 收藏或取消收藏
+      x-permission: UserAuth
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FavoriteRequest"
+      responses:
+        "200":
+          description: 操作成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptyResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /upload:
+    post:
+      tags: [UserAuth]
+      summary: 上传文件
+      x-permission: UserAuth
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                scene:
+                  type: string
+                  enum: [avatar, pet, lost, adoption, community]
+      responses:
+        "200":
+          description: 上传成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /admin/auth/login:
+    post:
+      tags: [AdminAuth]
+      summary: 管理员登录
+      x-permission: Public
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginRequest"
+      responses:
+        "200":
+          description: 登录成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+
+  /admin/users:
+    get:
+      tags: [AdminAuth]
+      summary: 用户管理列表
+      x-permission: AdminAuth
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: 用户列表。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUserPageResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /admin/hospitals:
+    get:
+      tags: [AdminAuth]
+      summary: 医院管理列表
+      x-permission: AdminAuth
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: 医院管理列表。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HospitalListResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags: [AdminAuth]
+      summary: 新增医院
+      x-permission: AdminAuth
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HospitalMutationRequest"
+      responses:
+        "200":
+          description: 创建成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HospitalDetailResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /admin/hospitals/{id}:
+    patch:
+      tags: [AdminAuth]
+      summary: 更新医院
+      x-permission: AdminAuth
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HospitalMutationRequest"
+      responses:
+        "200":
+          description: 更新成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HospitalDetailResponse"
+    delete:
+      tags: [AdminAuth]
+      summary: 删除医院
+      x-permission: AdminAuth
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      responses:
+        "200":
+          description: 删除成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptyResponse"
+
+  /admin/lost-pets/{id}/audit:
+    patch:
+      tags: [AdminAuth]
+      summary: 寻宠审核
+      x-permission: AdminAuth
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditRequest"
+      responses:
+        "200":
+          description: 审核成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptyResponse"
+
+  /admin/adoptions/{id}/audit:
+    patch:
+      tags: [AdminAuth]
+      summary: 领养审核
+      x-permission: AdminAuth
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditRequest"
+      responses:
+        "200":
+          description: 审核成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptyResponse"
+
+  /admin/community/posts/{id}/audit:
+    patch:
+      tags: [AdminAuth]
+      summary: 社区帖子审核
+      x-permission: AdminAuth
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PathId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditRequest"
+      responses:
+        "200":
+          description: 审核成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptyResponse"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PathId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+
+  responses:
+    Unauthorized:
+      description: 未登录或 Token 无效。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: 无权限。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: 数据不存在。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    EmptyResponse:
+      type: object
+      required: [code, message, data]
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: 操作成功
+        data:
+          nullable: true
+          example: null
+
+    ErrorResponse:
+      type: object
+      required: [code, message, data]
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: 请求参数错误
+        data:
+          nullable: true
+          example: null
+
+    HomeResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/HomeSummary"
+
+    HomeSummary:
+      type: object
+      required: [emergencyEntrances, hospitalEntrance, lostPetEntrance]
+      properties:
+        emergencyEntrances:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuickEntry"
+        hospitalEntrance:
+          $ref: "#/components/schemas/QuickEntry"
+        lostPetEntrance:
+          $ref: "#/components/schemas/QuickEntry"
+
+    QuickEntry:
+      type: object
+      required: [title, path]
+      properties:
+        title:
+          type: string
+        path:
+          type: string
+        iconUrl:
+          type: string
+
+    EmergencyCategoryListResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/EmergencyCategory"
+
+    EmergencyCategory:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        sort:
+          type: integer
+
+    EmergencyArticleListResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/EmergencyArticleSummary"
+
+    EmergencyArticleDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/EmergencyArticleDetail"
+
+    EmergencyArticleSummary:
+      type: object
+      required: [id, title, categoryId]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        categoryId:
+          type: string
+        coverUrl:
+          type: string
+        summary:
+          type: string
+
+    EmergencyArticleDetail:
+      allOf:
+        - $ref: "#/components/schemas/EmergencyArticleSummary"
+        - type: object
+          required: [content]
+          properties:
+            content:
+              type: string
+            riskNotice:
+              type: string
+
+    HospitalListResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/Hospital"
+
+    HospitalDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Hospital"
+
+    Hospital:
+      type: object
+      required: [id, name, address]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+        openingHours:
+          type: string
+
+    HospitalMutationRequest:
+      type: object
+      required: [name, address]
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+        openingHours:
+          type: string
+
+    PageMeta:
+      type: object
+      required: [page, pageSize, total]
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+
+    LostPetPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [list, page, pageSize, total]
+              properties:
+                list:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/LostPet"
+                page:
+                  type: integer
+                pageSize:
+                  type: integer
+                total:
+                  type: integer
+
+    LostPetDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/LostPet"
+
+    LostPet:
+      type: object
+      required: [id, petName, lostTime, contactPhone, status]
+      properties:
+        id:
+          type: string
+        petName:
+          type: string
+        lostTime:
+          type: string
+          format: date-time
+        lostAddress:
+          type: string
+        contactPhone:
+          type: string
+        description:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected, closed]
+
+    CreateLostPetRequest:
+      type: object
+      required: [petName, lostTime, contactPhone]
+      properties:
+        petName:
+          type: string
+        lostTime:
+          type: string
+          format: date-time
+        lostAddress:
+          type: string
+        contactPhone:
+          type: string
+        description:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+
+    AdoptionPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [list, page, pageSize, total]
+              properties:
+                list:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Adoption"
+                page:
+                  type: integer
+                pageSize:
+                  type: integer
+                total:
+                  type: integer
+
+    AdoptionDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Adoption"
+
+    Adoption:
+      type: object
+      required: [id, title, contactPhone, status]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        contactPhone:
+          type: string
+        description:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected, closed]
+
+    CreateAdoptionRequest:
+      type: object
+      required: [title, contactPhone]
+      properties:
+        title:
+          type: string
+        contactPhone:
+          type: string
+        description:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+
+    CommunityPostPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [list, page, pageSize, total]
+              properties:
+                list:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/CommunityPost"
+                page:
+                  type: integer
+                pageSize:
+                  type: integer
+                total:
+                  type: integer
+
+    CommunityPostDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CommunityPost"
+
+    CommunityPost:
+      type: object
+      required: [id, title, content, status]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+
+    CreatePostRequest:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+
+    CreateCommentRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+
+    CommentResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [id, content]
+              properties:
+                id:
+                  type: string
+                content:
+                  type: string
+
+    LoginRequest:
+      type: object
+      required: [phone, password]
+      properties:
+        phone:
+          type: string
+        password:
+          type: string
+          format: password
+
+    AdminLoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [token, user]
+              properties:
+                token:
+                  type: string
+                user:
+                  $ref: "#/components/schemas/UserProfile"
+
+    UserProfileResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/UserProfile"
+
+    UserProfile:
+      type: object
+      required: [id, nickname]
+      properties:
+        id:
+          type: string
+        nickname:
+          type: string
+        avatarUrl:
+          type: string
+        role:
+          type: string
+          enum: [user, admin]
+
+    PetProfileListResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/PetProfile"
+
+    PetProfileResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/PetProfile"
+
+    PetProfile:
+      type: object
+      required: [id, name, species]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        species:
+          type: string
+          enum: [dog, cat, other]
+        breed:
+          type: string
+        birthday:
+          type: string
+          format: date
+        avatarUrl:
+          type: string
+
+    CreatePetRequest:
+      type: object
+      required: [name, species]
+      properties:
+        name:
+          type: string
+        species:
+          type: string
+          enum: [dog, cat, other]
+        breed:
+          type: string
+        birthday:
+          type: string
+          format: date
+        avatarUrl:
+          type: string
+
+    UpdatePetRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        species:
+          type: string
+          enum: [dog, cat, other]
+        breed:
+          type: string
+        birthday:
+          type: string
+          format: date
+        avatarUrl:
+          type: string
+
+    FavoriteRequest:
+      type: object
+      required: [targetType, targetId, favorited]
+      properties:
+        targetType:
+          type: string
+          enum: [emergencyArticle, hospital, lostPet, adoption, communityPost]
+        targetId:
+          type: string
+        favorited:
+          type: boolean
+
+    UploadResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [fileUrl]
+              properties:
+                fileUrl:
+                  type: string
+                fileKey:
+                  type: string
+                contentType:
+                  type: string
+
+    AdminUserPageResponse:
+      allOf:
+        - $ref: "#/components/schemas/EmptyResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [list, page, pageSize, total]
+              properties:
+                list:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/UserProfile"
+                page:
+                  type: integer
+                pageSize:
+                  type: integer
+                total:
+                  type: integer
+
+    AuditRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [approved, rejected]
+        reason:
+          type: string

@@ -1,0 +1,2 @@
+-- Seed data is intentionally empty at skeleton handoff.
+-- Add deterministic development fixtures after Prisma models are finalized.
