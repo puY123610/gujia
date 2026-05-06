@@ -1,14 +1,10 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common'
-
-interface RequestUser {
-  role?: string
-  roles?: string[]
-}
+import { RequestWithUser } from '../types/authenticated-user'
 
 @Injectable()
 export class AdminGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest<{ user?: RequestUser }>()
+    const request = context.switchToHttp().getRequest<RequestWithUser>()
     const user = request.user
     const isAdmin = user?.role === 'admin' || user?.roles?.includes('admin')
 

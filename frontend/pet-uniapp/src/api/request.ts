@@ -4,12 +4,12 @@ export interface ApiResponse<T = unknown> {
   data: T
 }
 
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
 export interface RequestOptions {
   url: string
   method?: HttpMethod
-  data?: unknown
+  data?: Record<string, unknown> | string | ArrayBuffer
   header?: Record<string, string>
   auth?: boolean
 }

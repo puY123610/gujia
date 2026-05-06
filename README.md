@@ -94,6 +94,8 @@ pet-platform/
 pnpm check:env
 pnpm install
 pnpm services:start
+pnpm prisma:generate
+pnpm prisma:migrate
 pnpm generate:types
 pnpm dev:backend
 pnpm dev:frontend:h5
@@ -146,11 +148,16 @@ docs/
 
 ## 9. 当前骨架状态
 
-当前状态是“可交接开发骨架”：
+当前状态是“基础设施已加固的可交接开发骨架”：
 
-- 三端目录和基础 TypeScript 配置已存在；
+- 三端目录和基础 TypeScript 配置已存在，H5 与微信小程序脚本已明确；
+- Android App 先走 uni-app App 发行路径，不引入独立原生 Android 工程；
 - 根目录 pnpm 工作区已建立；
+- `pnpm-lock.yaml` 已生成，依赖版本已从浮动范围收紧到明确版本；
 - Docker Compose 已包含 PostgreSQL/PostGIS、Redis、MinIO、后端和 Nginx；
-- OpenAPI 首版权限分层契约已存在；
-- UserAuth/AdminAuth 守卫默认不放行，避免误把受保护接口暴露为 Public；
-- 业务模块仍处于骨架阶段，下一步应按接口契约逐模块实现。
+- Nginx 已预留 `/api`、`/h5`、`/admin` 入口；
+- Prisma 已建立第一版 MVP 数据模型和 migration，数据库结构以 Prisma 为唯一来源；
+- OpenAPI 首版权限分层契约已存在，接口类型以 `api-contract/openapi.yaml` 生成结果为准；
+- Auth/JWT 基础闭环已接入，UserAuth/AdminAuth 可基于 token 注入用户身份；
+- 上传模块已建立统一对象存储抽象，默认 MinIO，OSS/COS 仅保留后续扩展边界；
+- 业务页面和业务接口仍处于骨架阶段，下一步应按接口契约逐模块实现。

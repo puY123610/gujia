@@ -18,7 +18,7 @@ services:
       - "6379:6379"
 
   minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: pet-minio
     command: server /data --console-address ":9001"
     environment:
@@ -32,8 +32,8 @@ services:
 
   backend:
     build:
-      context: ../backend/pet-nestjs
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: backend/pet-nestjs/Dockerfile
     container_name: pet-backend
     depends_on:
       - postgresql
@@ -46,12 +46,16 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       JWT_SECRET: ${JWT_SECRET:-dev_only_replace_before_production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       STORAGE_DRIVER: minio
       MINIO_ENDPOINT: minio
       MINIO_PORT: 9000
+      MINIO_USE_SSL: "false"
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
       MINIO_BUCKET: ${MINIO_BUCKET:-pet-platform}
+      PUBLIC_FILE_BASE_URL: ${PUBLIC_FILE_BASE_URL:-http://localhost:9000/pet-platform}
+      UPLOAD_MAX_BYTES: ${UPLOAD_MAX_BYTES:-10485760}
     ports:
       - "3000:3000"
 
@@ -65,6 +69,8 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/pet-platform.conf:/etc/nginx/conf.d/pet-platform.conf:ro
+      - ../frontend/pet-uniapp/dist/build/h5:/usr/share/nginx/html/h5:ro
+      - ../admin/pet-admin/dist:/usr/share/nginx/html/admin:ro
 
 volumes:
   pet_postgresql_data:

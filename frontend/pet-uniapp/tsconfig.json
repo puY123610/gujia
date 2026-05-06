@@ -5,6 +5,7 @@
     "strict": true,
     "jsx": "preserve",
     "moduleResolution": "Bundler",
+    "skipLibCheck": true,
     "types": ["@dcloudio/types", "vite/client"]
   },
   "include": ["src/**/*.ts", "src/**/*.vue"]

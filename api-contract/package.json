@@ -6,6 +6,6 @@
     "generate": "openapi-typescript openapi.yaml -o generated-types/api-types.ts"
   },
   "devDependencies": {
-    "openapi-typescript": "^7.0.0"
+    "openapi-typescript": "7.13.0"
   }
 }

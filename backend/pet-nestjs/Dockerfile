@@ -1,17 +1,20 @@
 FROM node:20-alpine AS build
 
-WORKDIR /app
+WORKDIR /workspace
 
 RUN corepack enable
 
-COPY package.json ./
-RUN pnpm install
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY backend/pet-nestjs/package.json backend/pet-nestjs/package.json
 
-COPY prisma ./prisma
-COPY . .
+RUN pnpm install --filter pet-nestjs... --frozen-lockfile
 
+COPY backend/pet-nestjs backend/pet-nestjs
+
+WORKDIR /workspace/backend/pet-nestjs
+RUN pnpm prisma:generate
 RUN pnpm build
-RUN pnpm prune --prod
+RUN pnpm --filter pet-nestjs deploy --legacy --prod /app
 
 FROM node:20-alpine
 
@@ -19,9 +22,8 @@ WORKDIR /app
 
 RUN corepack enable
 
-COPY --from=build /app/package.json ./package.json
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/prisma ./prisma
+COPY --from=build /app ./
+COPY --from=build /workspace/backend/pet-nestjs/dist ./dist
+COPY --from=build /workspace/backend/pet-nestjs/prisma ./prisma
 
 CMD ["pnpm", "start:prod"]

@@ -6,3 +6,252 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  OPERATOR
+}
+
+enum AccountStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum PetSpecies {
+  DOG
+  CAT
+  OTHER
+}
+
+enum PetGender {
+  MALE
+  FEMALE
+  UNKNOWN
+}
+
+enum ContentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CLOSED
+}
+
+enum FileStorageType {
+  MINIO
+  OSS
+  COS
+}
+
+model User {
+  id           String        @id @default(uuid()) @db.Uuid
+  phone        String?       @unique @db.VarChar(32)
+  passwordHash String?       @db.VarChar(255)
+  nickname     String        @db.VarChar(64)
+  avatarUrl    String?       @db.VarChar(512)
+  role         UserRole      @default(USER)
+  status       AccountStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  pets           Pet[]
+  lostPets       LostPet[]
+  adoptions      Adoption[]
+  communityPosts CommunityPost[]
+  comments       Comment[]
+  favorites      Favorite[]
+  files          FileResource[]
+
+  @@index([status])
+}
+
+model AdminUser {
+  id           String        @id @default(uuid()) @db.Uuid
+  username     String        @unique @db.VarChar(64)
+  passwordHash String        @db.VarChar(255)
+  role         AdminRole     @default(OPERATOR)
+  status       AccountStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Pet {
+  id          String     @id @default(uuid()) @db.Uuid
+  userId      String     @db.Uuid
+  name        String     @db.VarChar(64)
+  species     PetSpecies
+  breed       String?    @db.VarChar(64)
+  gender      PetGender  @default(UNKNOWN)
+  birthday    DateTime?  @db.Date
+  weight      Decimal?   @db.Decimal(6, 2)
+  avatarUrl   String?    @db.VarChar(512)
+  medicalNote String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model EmergencyCategory {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(64)
+  sort      Int      @default(0)
+  status    String   @default("active") @db.VarChar(32)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  articles EmergencyArticle[]
+
+  @@index([status, sort])
+}
+
+model EmergencyArticle {
+  id         String        @id @default(uuid()) @db.Uuid
+  categoryId String        @db.Uuid
+  title      String        @db.VarChar(120)
+  summary    String?
+  content    String
+  coverUrl   String?       @db.VarChar(512)
+  riskLevel  String?       @db.VarChar(32)
+  status     ContentStatus @default(PENDING)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  category EmergencyCategory @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId])
+  @@index([status])
+}
+
+model Hospital {
+  id                 String   @id @default(uuid()) @db.Uuid
+  name               String   @db.VarChar(120)
+  phone              String?  @db.VarChar(32)
+  address            String   @db.VarChar(255)
+  longitude          Decimal? @db.Decimal(10, 6)
+  latitude           Decimal? @db.Decimal(10, 6)
+  location           Unsupported("geography(Point,4326)")?
+  businessHours      String?  @db.VarChar(128)
+  emergencyAvailable Boolean  @default(false)
+  status             String   @default("active") @db.VarChar(32)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([status])
+}
+
+model LostPet {
+  id           String        @id @default(uuid()) @db.Uuid
+  userId       String        @db.Uuid
+  petName      String        @db.VarChar(64)
+  species      PetSpecies?
+  description  String?
+  lostTime     DateTime
+  lostAddress  String?       @db.VarChar(255)
+  longitude    Decimal?      @db.Decimal(10, 6)
+  latitude     Decimal?      @db.Decimal(10, 6)
+  location     Unsupported("geography(Point,4326)")?
+  imageUrls    Json?
+  contactPhone String        @db.VarChar(32)
+  status       ContentStatus @default(PENDING)
+  auditStatus  ContentStatus @default(PENDING)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([auditStatus])
+}
+
+model Adoption {
+  id           String        @id @default(uuid()) @db.Uuid
+  userId       String        @db.Uuid
+  petName      String?       @db.VarChar(64)
+  title        String        @db.VarChar(120)
+  species      PetSpecies?
+  description  String?
+  imageUrls    Json?
+  contactPhone String        @db.VarChar(32)
+  status       ContentStatus @default(PENDING)
+  auditStatus  ContentStatus @default(PENDING)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([auditStatus])
+}
+
+model CommunityPost {
+  id          String        @id @default(uuid()) @db.Uuid
+  userId      String        @db.Uuid
+  title       String        @db.VarChar(120)
+  content     String
+  imageUrls   Json?
+  status      ContentStatus @default(PENDING)
+  auditStatus ContentStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([auditStatus])
+}
+
+model Comment {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  targetType String   @db.VarChar(64)
+  targetId   String   @db.Uuid
+  content    String
+  status     String   @default("active") @db.VarChar(32)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([targetType, targetId])
+}
+
+model Favorite {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  targetType String   @db.VarChar(64)
+  targetId   String   @db.Uuid
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@unique([userId, targetType, targetId])
+}
+
+model FileResource {
+  id          String          @id @default(uuid()) @db.Uuid
+  userId      String?         @db.Uuid
+  fileName    String          @db.VarChar(255)
+  fileUrl     String          @db.VarChar(512)
+  fileKey     String          @db.VarChar(512)
+  fileType    String          @db.VarChar(128)
+  fileSize    BigInt
+  storageType FileStorageType @default(MINIO)
+  createdAt   DateTime        @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([storageType])
+}

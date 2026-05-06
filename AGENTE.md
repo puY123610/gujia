@@ -206,6 +206,14 @@ upload.api.ts
 backend/pet-nestjs/
 ```
 
+### 7.1 数据库与接口来源
+
+数据库结构必须以 `backend/pet-nestjs/prisma/schema.prisma` 和 `backend/pet-nestjs/prisma/migrations/` 为唯一来源。
+
+接口契约必须以 `api-contract/openapi.yaml` 为唯一来源，`api-contract/generated-types/api-types.ts` 必须通过 `pnpm generate:types` 生成。
+
+`database/postgresql/*.sql` 只保留扩展、初始化说明或开发辅助，不允许在其中另写业务表结构。
+
 推荐结构：
 
 ```txt

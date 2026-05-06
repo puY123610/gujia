@@ -29,6 +29,8 @@ fi
 
 echo "Next steps:"
 echo "  pnpm services:start"
+echo "  pnpm prisma:generate"
+echo "  pnpm prisma:migrate"
 echo "  pnpm generate:types"
 echo "  pnpm dev:backend"
 echo "  pnpm dev:frontend:h5"
